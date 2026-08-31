@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Your doubts · Pseudo Connect{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Student desk</p>
+    <h1>Ask like nobody is watching.</h1>
+    <p class="lede">Four subjects. Alias if you want it. Files if the doubt lives in a screenshot.</p>
+  </div>
+  <a class="btn" href="{{ url_for('student_ask') }}">New doubt</a>
+</section>
+
+<section class="grid-4">
+  {% for s in subjects %}
+    <a class="subject tone-{{ s.tone }}" href="{{ url_for('student_ask') }}?subject={{ s.id }}">
+      <h2>{{ s.label }}</h2>
+      <p>{{ s.blurb }}</p>
+    </a>
+  {% endfor %}
+</section>
+
+<section>
+  <h2 class="section-title">Your thread</h2>
+  {% if doubts %}
+    <ul class="cards">
+      {% for d in doubts %}
+        <li>
+          <a class="card" href="{{ url_for('student_doubt', doubt_id=d.id) }}">
+            <div class="card-top">
+              <span class="pill">{{ subject_map[d.subject].label }}</span>
+              <span class="pill {{ 'anon' if d.anonymous else 'named' }}">
+                {{ d.alias if d.anonymous else 'Shown as you' }}
+              </span>
+              <span class="status">{{ d.status }}</span>
+            </div>
+            <h3>{{ d.title }}</h3>
+            <p>{{ d.body[:140] }}{% if d.body|length > 140 %}…{% endif %}</p>
+            <small>{{ d.created_at }}</small>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No doubts yet. The first one is usually the hardest to type — then it gets easier.</p>
+  {% endif %}
+</section>
+{% endblock %}

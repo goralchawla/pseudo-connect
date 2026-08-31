@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Reply · Pseudo Connect{% endblock %}
+{% block content %}
+<p><a class="back" href="{{ url_for('teacher_home') }}">← Inbox</a></p>
+<section class="split">
+  <article class="panel">
+    <div class="card-top">
+      <span class="pill {{ 'anon' if doubt.anonymous else 'named' }}">{{ shown }}</span>
+      <span class="pill">{{ subject_map[doubt.subject].label }}</span>
+    </div>
+    <h1>{{ doubt.title }}</h1>
+    <p class="body-text">{{ doubt.body }}</p>
+    {% if doubt.filename %}
+      <p class="attach">
+        File:
+        <a href="{{ url_for('uploaded_file', filename=doubt.filename) }}" target="_blank" rel="noopener">
+          {{ doubt.original_filename }}
+        </a>
+      </p>
+    {% endif %}
+    <p class="hint">Student name is hidden unless they opted out of anonymity. You never see a gossip list here.</p>
+  </article>
+  <aside class="stack">
+    {% for a in answers %}
+      <blockquote class="panel">
+        <p>{{ a.body }}</p>
+        <footer>You · {{ a.created_at }}</footer>
+      </blockquote>
+    {% endfor %}
+    <form method="post" class="panel form">
+      <label>
+        Your answer
+        <textarea name="answer" required rows="8" placeholder="Explain the stuck step. The student sees this on their portal."></textarea>
+      </label>
+      <button class="btn" type="submit">Post to student portal</button>
+    </form>
+  </aside>
+</section>
+{% endblock %}

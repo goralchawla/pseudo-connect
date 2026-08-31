@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ doubt.title }} · Pseudo Connect{% endblock %}
+{% block content %}
+<p><a class="back" href="{{ url_for('student_home') }}">← Your thread</a></p>
+<section class="split">
+  <article class="panel">
+    <div class="card-top">
+      <span class="pill">{{ subject_map[doubt.subject].label }}</span>
+      <span class="pill {{ 'anon' if doubt.anonymous else 'named' }}">
+        {{ 'Alias: ' + doubt.alias if doubt.anonymous else 'Shown as you' }}
+      </span>
+      <span class="status">{{ doubt.status }}</span>
+    </div>
+    <h1>{{ doubt.title }}</h1>
+    <p class="body-text">{{ doubt.body }}</p>
+    {% if doubt.filename %}
+      <p class="attach">
+        Attachment:
+        <a href="{{ url_for('uploaded_file', filename=doubt.filename) }}" target="_blank" rel="noopener">
+          {{ doubt.original_filename }}
+        </a>
+      </p>
+    {% endif %}
+    <small>Posted {{ doubt.created_at }}</small>
+  </article>
+
+  <aside class="stack">
+    <section class="panel">
+      <h2>Teacher’s reply</h2>
+      {% if answers %}
+        {% for a in answers %}
+          <blockquote>
+            <p>{{ a.body }}</p>
+            <footer>{{ a.teacher_name }} · {{ a.created_at }}</footer>
+          </blockquote>
+        {% endfor %}
+      {% else %}
+        <p class="empty">No answer yet. It will land here the moment it is written.</p>
+      {% endif %}
+    </section>
+
+    <form class="panel form" method="post">
+      <h2>Still stuck?</h2>
+      <label>
+        Follow-up
+        <textarea name="followup" rows="4" placeholder="What is still unclear after the reply?"></textarea>
+      </label>
+      <button class="btn btn-ghost" type="submit">Add follow-up</button>
+    </form>
+
+    <section class="panel">
+      <h2>Talk it through</h2>
+      <p>Your alias stays on for Google Meet. Campus sit-downs use the teacher’s open hours.</p>
+      {% if slots %}
+        <ul class="slots">
+          {% for s in slots %}
+            <li>{{ s.weekday }} {{ s.start_time }}–{{ s.end_time }} · {{ s.mode }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No hours posted yet. You can still request a Meet.</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('student_meet', doubt_id=doubt.id) }}" class="form">
+        <label>
+          Kind
+          <select name="kind">
+            <option value="google">Google Meet (identity hidden)</option>
+            <option value="campus">Offline, on campus</option>
+          </select>
+        </label>
+        {% if slots %}
+          <label>
+            Preferred slot
+            <select name="slot">
+              {% for s in slots %}
+                <option value="{{ s.weekday }} {{ s.start_time }}–{{ s.end_time }}">
+                  {{ s.weekday }} {{ s.start_time }}–{{ s.end_time }} ({{ s.mode }})
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+        {% endif %}
+        <button class="btn" type="submit">Request meeting</button>
+      </form>
+      {% if meetings %}
+        <ul class="meet-list">
+          {% for m in meetings %}
+            <li>
+              <strong>{{ m.kind }}</strong> · {{ m.status }}
+              {% if m.slot %} · {{ m.slot }}{% endif %}
+              {% if m.meet_link %}
+                · <a href="{{ m.meet_link }}" target="_blank" rel="noopener">Join Meet as {{ doubt.alias }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+  </aside>
+</section>
+{% endblock %}

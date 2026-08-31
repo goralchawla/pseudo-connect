@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Admin · Pseudo Connect{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Admin desk</p>
+    <h1>See the names. Guard the tone.</h1>
+    <p class="lede">Teachers stay anonymous-first. You see who wrote what, and you can hide a post that crosses the line.</p>
+  </div>
+</section>
+
+<section class="stats">
+  <div><strong>{{ stats.students }}</strong> students</div>
+  <div><strong>{{ stats.teachers }}</strong> teachers</div>
+  <div><strong>{{ stats.doubts }}</strong> doubts</div>
+  <div class="flag"><strong>{{ stats.flagged }}</strong> flagged</div>
+</section>
+
+<section>
+  <h2 class="section-title">All doubts</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Shown to teacher</th>
+          <th>Subject</th>
+          <th>Title</th>
+          <th>Flag</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in doubts %}
+          <tr class="{{ 'row-flag' if d.flagged }} {{ 'row-hidden' if d.hidden }}">
+            <td>
+              <a href="{{ url_for('admin_doubt', doubt_id=d.id) }}">{{ d.student_name }}</a>
+              <small>{{ d.student_email }}</small>
+            </td>
+            <td>{{ d.alias if d.anonymous else d.student_name }}</td>
+            <td>{{ subject_map[d.subject].label }}</td>
+            <td>{{ d.title }}{% if d.hidden %} · hidden{% endif %}</td>
+            <td>{{ d.flag_reason or '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="split">
+  <div>
+    <h2 class="section-title">Meetings</h2>
+    <ul class="meet-list">
+      {% for m in meetings %}
+        <li>{{ m.student_name }} · {{ m.kind }} · {{ m.status }} · {{ m.title }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div>
+    <h2 class="section-title">Registered users</h2>
+    <ul class="meet-list">
+      {% for u in users %}
+        <li>{{ u.name }} · {{ u.email }} · {{ u.role }}{% if u.subjects %} · {{ u.subjects }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Review · Pseudo Connect{% endblock %}
+{% block content %}
+<p><a class="back" href="{{ url_for('admin_home') }}">← Admin desk</a></p>
+<section class="split">
+  <article class="panel">
+    <div class="card-top">
+      <span class="pill named">{{ doubt.student_name }}</span>
+      <span class="pill">{{ doubt.student_email }}</span>
+      {% if doubt.flagged %}<span class="pill flag">Flagged</span>{% endif %}
+      {% if doubt.hidden %}<span class="pill">Hidden</span>{% endif %}
+    </div>
+    <h1>{{ doubt.title }}</h1>
+    <p class="hint">Teacher sees: <strong>{{ doubt.alias if doubt.anonymous else doubt.student_name }}</strong></p>
+    <p class="body-text">{{ doubt.body }}</p>
+    {% if doubt.flag_reason %}<p class="warn-note">{{ doubt.flag_reason }}</p>{% endif %}
+    {% if doubt.filename %}
+      <p class="attach">
+        File:
+        <a href="{{ url_for('uploaded_file', filename=doubt.filename) }}" target="_blank" rel="noopener">
+          {{ doubt.original_filename }}
+        </a>
+      </p>
+    {% endif %}
+  </article>
+  <aside class="stack">
+    {% for a in answers %}
+      <blockquote class="panel">
+        <p>{{ a.body }}</p>
+        <footer>{{ a.teacher_name }} · {{ a.created_at }}</footer>
+      </blockquote>
+    {% endfor %}
+    <form method="post" class="panel form">
+      <h2>Moderation</h2>
+      <p>Hide a post from teachers if it is abuse. Clear a false flag. Names stay on this desk only.</p>
+      <div class="row">
+        <button class="btn" name="action" value="hide" type="submit">Hide from teachers</button>
+        <button class="btn btn-ghost" name="action" value="clear" type="submit">Clear flag</button>
+        <button class="btn btn-ghost" name="action" value="flag" type="submit">Flag</button>
+      </div>
+    </form>
+  </aside>
+</section>
+{% endblock %}

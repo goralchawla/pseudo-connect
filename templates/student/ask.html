@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Ask a doubt · Pseudo Connect{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">New doubt</p>
+    <h1>Write the stuck point.</h1>
+  </div>
+</section>
+
+<form class="panel form ask" method="post" enctype="multipart/form-data">
+  <fieldset class="subjects-pick">
+    <legend>Subject</legend>
+    {% set pre = request.args.get('subject', '') %}
+    {% for s in subjects %}
+      <label class="chip">
+        <input type="radio" name="subject" value="{{ s.id }}" {% if pre == s.id or (not pre and loop.first) %}checked{% endif %}>
+        <span>{{ s.label }}</span>
+      </label>
+    {% endfor %}
+  </fieldset>
+
+  <label>
+    Title
+    <input type="text" name="title" required maxlength="120" placeholder="e.g. Why is my CSS grid collapsing on mobile?">
+  </label>
+  <label>
+    The doubt
+    <textarea name="body" required rows="7" placeholder="What you tried, where it broke, what you expected."></textarea>
+  </label>
+  <label class="file">
+    File to explain it (optional)
+    <input type="file" name="attachment">
+    <small>Images, PDF, zip, or code — up to 16 MB.</small>
+  </label>
+
+  <div class="anon-toggle">
+    <input type="checkbox" id="anonymous" name="anonymous" checked>
+    <label for="anonymous">
+      <strong>Keep my identity anonymous</strong>
+      <span>Teacher sees an alias, not your name. Admin can still see you if this desk is misused.</span>
+    </label>
+  </div>
+
+  <button class="btn" type="submit">Send to the teacher</button>
+</form>
+{% endblock %}
