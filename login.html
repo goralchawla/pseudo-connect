@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}College login · Pseudo Connect{% endblock %}
+{% block content %}
+<section class="auth">
+  <div>
+    <p class="eyebrow">Registered mail only</p>
+    <h1>Sign in to your desk</h1>
+    <p class="lede">Use the college email already on the portal. Demo accounts are listed beside the form.</p>
+  </div>
+  <form method="post" class="panel form">
+    <label>
+      College email
+      <input type="email" name="email" required placeholder="you@college.edu" autocomplete="username">
+    </label>
+    <label>
+      Password
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button class="btn" type="submit">Open portal</button>
+  </form>
+  <aside class="panel demos">
+    <h2>Demo logins</h2>
+    <p>Password for students: <code>student123</code> · teachers: <code>teacher123</code> · admin: <code>admin123</code></p>
+    <ul>
+      <li>Student · rahul@college.edu</li>
+      <li>Student · ananya@college.edu</li>
+      <li>Java · java.faculty@college.edu</li>
+      <li>Web Dev · web.faculty@college.edu</li>
+      <li>Maths · maths.faculty@college.edu</li>
+      <li>Physics · physics.faculty@college.edu</li>
+      <li>Admin · admin@college.edu</li>
+    </ul>
+  </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% macro attachment(file, original, label='Attachment') %}
+  {% if file %}
+    {% if is_image_file(file) %}
+      <a class="snippet" href="{{ url_for('uploaded_file', filename=file) }}" target="_blank" rel="noopener">
+        <img src="{{ url_for('uploaded_file', filename=file) }}" alt="{{ original or 'Page snippet' }}">
+        <span>{{ original or 'Page snippet' }}</span>
+      </a>
+    {% else %}
+      <p class="attach">
+        {{ label }}:
+        <a href="{{ url_for('uploaded_file', filename=file) }}" target="_blank" rel="noopener">
+          {{ original }}
+        </a>
+      </p>
+    {% endif %}
+  {% endif %}
+{% endmacro %}

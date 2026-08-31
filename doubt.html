@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import attachment with context %}
+{% block title %}Reply · Pseudo Connect{% endblock %}
+{% block content %}
+<p><a class="back" href="{{ url_for('teacher_home') }}">← Inbox</a></p>
+<section class="split">
+  <article class="panel">
+    <div class="card-top">
+      <span class="pill {{ 'anon' if doubt.anonymous else 'named' }}">{{ shown }}</span>
+      <span class="pill">{{ subject_map[doubt.subject].label }}</span>
+    </div>
+    <h1>{{ doubt.title }}</h1>
+    <p class="body-text">{{ doubt.body }}</p>
+    {{ attachment(doubt.filename, doubt.original_filename, 'File') }}
+    <p class="hint">Student name is hidden unless they opted out of anonymity. You never see a gossip list here.</p>
+  </article>
+  <aside class="stack">
+    {% for a in answers %}
+      <blockquote class="panel">
+        {% if a.body %}<p>{{ a.body }}</p>{% endif %}
+        {{ attachment(a.filename, a.original_filename, 'Page snippet') }}
+        <footer>You · {{ a.created_at }}</footer>
+      </blockquote>
+    {% endfor %}
+    <form method="post" class="panel form" enctype="multipart/form-data">
+      <label>
+        Your answer
+        <textarea name="answer" rows="8" placeholder="Explain the stuck step. The student sees this on their portal."></textarea>
+      </label>
+      <label class="file">
+        Page snippet
+        <input type="file" name="snippet" accept="image/*,.pdf,.html,.htm,.png,.jpg,.jpeg,.webp,.gif">
+        <small>Screenshot of the page, PDF, or HTML excerpt — optional, up to 16 MB.</small>
+      </label>
+      <button class="btn" type="submit">Post to student portal</button>
+    </form>
+  </aside>
+</section>
+{% endblock %}

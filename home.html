@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Teacher desk · Pseudo Connect{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">{{ subject_map[user.subjects].label }} desk</p>
+    <h1>Doubts, without the roll call.</h1>
+    <p class="lede">If a student chose an alias, that is all you see. Admin handles names when language goes wrong.</p>
+  </div>
+</section>
+
+<section class="split">
+  <div>
+    <h2 class="section-title">Inbox</h2>
+    {% if doubts %}
+      <ul class="cards">
+        {% for d in doubts %}
+          <li>
+            <a class="card" href="{{ url_for('teacher_doubt', doubt_id=d.id) }}">
+              <div class="card-top">
+                <span class="pill {{ 'anon' if d.anonymous else 'named' }}">
+                  {{ d.alias if d.anonymous else d.student_name }}
+                </span>
+                <span class="status">{{ d.status }}</span>
+              </div>
+              <h3>{{ d.title }}</h3>
+              <p>{{ d.body[:160] }}{% if d.body|length > 160 %}…{% endif %}</p>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Quiet inbox. That’s a good hour.</p>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    <section class="panel">
+      <h2>Availability</h2>
+      <form method="post" action="{{ url_for('teacher_availability') }}" class="form">
+        <label>
+          Weekday
+          <select name="weekday">
+            {% for d in ['Monday','Tuesday','Wednesday','Thursday','Friday'] %}
+              <option>{{ d }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="row">
+          <label>From <input type="time" name="start_time" required></label>
+          <label>To <input type="time" name="end_time" required></label>
+        </div>
+        <label>
+          Mode
+          <select name="mode">
+            <option value="both">Meet or campus</option>
+            <option value="google">Google Meet only</option>
+            <option value="campus">Campus only</option>
+          </select>
+        </label>
+        <button class="btn btn-ghost" type="submit">Publish hours</button>
+      </form>
+      <ul class="slots">
+        {% for s in slots %}
+          <li>{{ s.weekday }} {{ s.start_time }}–{{ s.end_time }} · {{ s.mode }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Meeting requests</h2>
+      {% if meetings %}
+        <ul class="meet-list">
+          {% for m in meetings %}
+            <li>
+              <strong>{{ m.alias if m.anonymous else m.student_name }}</strong>
+              asked for {{ m.kind }}
+              {% if m.slot %} · {{ m.slot }}{% endif %}
+              · {{ m.status }}
+              {% if m.status == 'requested' %}
+                <form method="post" action="{{ url_for('teacher_meet', meet_id=m.id) }}" class="inline">
+                  <button name="action" value="accept" class="btn btn-tiny">Accept</button>
+                  <button name="action" value="decline" class="btn btn-tiny btn-ghost">Decline</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No meeting requests.</p>
+      {% endif %}
+    </section>
+  </aside>
+</section>
+{% endblock %}
