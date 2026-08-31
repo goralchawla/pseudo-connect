@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Pseudo Connect — ask without the audience{% endblock %}
+{% block main_class %}{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">For students who stall at “what will they think?”</p>
+    <h1>Ask the doubt.<br>Keep the name, or don’t.</h1>
+    <p class="lede">
+      Pseudo Connect is a college portal where questions go to teachers first —
+      not to a classroom of side-eyes. Stay behind an alias, or show up as yourself.
+      Admin can still see the person if someone misuses the desk.
+    </p>
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('login') }}">Sign in with college mail</a>
+      <a class="btn btn-ghost" href="#roles">See the three desks</a>
+    </div>
+  </div>
+  <aside class="hero-card" aria-hidden="true">
+    <div class="hero-glow"></div>
+    <div class="bubble student">“I still don’t get why this loop never ends…”</div>
+    <div class="bubble alias">shown to teacher as <strong>Quiet Kite</strong></div>
+    <div class="bubble teacher">“Here’s the trace. Size vs capacity is the trap.”</div>
+  </aside>
+</section>
+
+<section class="strip" id="roles">
+  <article>
+    <span class="role-index">01 · STUDENT</span>
+    <h2>Ask in private</h2>
+    <p>Registered college email only. Pick Java, Web Dev, Maths, or Physics. Attach a file. Toggle anonymous on or off.</p>
+  </article>
+  <article>
+    <span class="role-index">02 · TEACHER</span>
+    <h2>Reply, not roll call</h2>
+    <p>Sees the doubt, never a gossip trail. If the student chose an alias, that is all that appears — even in Google Meet.</p>
+  </article>
+  <article>
+    <span class="role-index">03 · ADMIN</span>
+    <h2>Guard the tone</h2>
+    <p>Sees the real name, flags foul language, and can hide a post. Safety without putting every student on stage.</p>
+  </article>
+</section>
+
+<section class="how wrap">
+  <h2>How a doubt travels</h2>
+  <ol class="steps">
+    <li><span>01</span> Login with the mail already on the college portal.</li>
+    <li><span>02</span> Choose a subject, write the stuck point, upload a screenshot or code if it helps.</li>
+    <li><span>03</span> Teacher answers on the portal. If you still need a voice, request a Google Meet (alias on) or a campus sit-down from their open hours.</li>
+  </ol>
+</section>
+{% endblock %}

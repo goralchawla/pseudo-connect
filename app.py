@@ -59,6 +59,8 @@ ALLOWED_EXTENSIONS = {
     "cpp",
 }
 
+IMAGE_EXTS = {"png", "jpg", "jpeg", "gif", "webp"}
+
 FOUL_WORDS = {
     "idiot",
     "stupid",
@@ -122,6 +124,28 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def is_image_file(filename: str | None) -> bool:
+    if not filename or "." not in filename:
+        return False
+    return filename.rsplit(".", 1)[1].lower() in IMAGE_EXTS
+def save_upload(file_storage):
+    if not file_storage or not file_storage.filename:
+        return None, None
+    if not allowed_file(file_storage.filename):
+        raise ValueError("That file type is not allowed. Try an image, PDF, zip, or code file.")
+    original = secure_filename(file_storage.filename)
+    ext = original.rsplit(".", 1)[1].lower()
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    file_storage.save(UPLOAD_DIR / filename)
+    return filename, original
+def ensure_answer_file_columns(db: sqlite3.Connection):
+    cols = {row[1] for row in db.execute("PRAGMA table_info(answers)").fetchall()}
+    if "filename" not in cols:
+        db.execute("ALTER TABLE answers ADD COLUMN filename TEXT")
+    if "original_filename" not in cols:
+        db.execute("ALTER TABLE answers ADD COLUMN original_filename TEXT")
+    db.commit()
+
 def init_db():
     db = sqlite3.connect(DB_PATH)
     db.executescript(
@@ -158,6 +182,8 @@ def init_db():
             doubt_id INTEGER NOT NULL,
             teacher_id INTEGER NOT NULL,
             body TEXT NOT NULL,
+            filename TEXT,
+            original_filename TEXT,
             created_at TEXT NOT NULL,
             FOREIGN KEY(doubt_id) REFERENCES doubts(id),
             FOREIGN KEY(teacher_id) REFERENCES users(id)
@@ -233,6 +259,7 @@ def init_db():
             """
         )
         db.commit()
+    ensure_answer_file_columns(db)    
     db.close()
 
 
@@ -266,6 +293,7 @@ def inject_globals():
         "user": current_user(),
         "subjects": SUBJECTS,
         "subject_map": {s["id"]: s for s in SUBJECTS},
+        "is_image_file": is_image_file,
     }
 
 
@@ -339,17 +367,14 @@ def student_ask():
             flash("Pick a subject and write both a title and the doubt itself.", "warn")
             return render_template("student/ask.html")
 
-        filename = None
-        original = None
+        
         file = request.files.get("attachment")
-        if file and file.filename:
-            if not allowed_file(file.filename):
-                flash("That file type is not allowed. Try an image, PDF, zip, or code file.", "warn")
-                return render_template("student/ask.html")
-            original = secure_filename(file.filename)
-            ext = original.rsplit(".", 1)[1].lower()
-            filename = f"{uuid.uuid4().hex}.{ext}"
-            file.save(UPLOAD_DIR / filename)
+
+        try:
+            filename, original = save_upload(file)
+        except ValueError as exc:
+            flash(str(exc), "warn")
+            return render_template("student/ask.html")
 
         flag_reason = scan_language(f"{title} {body}")
         alias = make_alias(f"{user['id']}-{title}-{now_iso()}")
@@ -526,15 +551,30 @@ def teacher_doubt(doubt_id: int):
         abort(404)
     if request.method == "POST":
         body = request.form.get("answer", "").strip()
-        if body:
-            db.execute(
-                "INSERT INTO answers (doubt_id, teacher_id, body, created_at) VALUES (?, ?, ?, ?)",
-                (doubt_id, user["id"], body, now_iso()),
-            )
-            db.execute("UPDATE doubts SET status = 'answered' WHERE id = ?", (doubt_id,))
-            db.commit()
-            flash("Answer posted. It now appears on the student's portal.", "ok")
+
+        snippet = request.files.get("snippet")
+        try:
+            filename, original = save_upload(snippet)
+        except ValueError as exc:
+            flash(str(exc), "warn")
+
             return redirect(url_for("teacher_doubt", doubt_id=doubt_id))
+
+        if not body and not filename:
+            flash("Write an answer or attach a page snippet.", "warn")
+            return redirect(url_for("teacher_doubt", doubt_id=doubt_id))
+        db.execute(
+            """
+            INSERT INTO answers (doubt_id, teacher_id, body, filename, original_filename, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (doubt_id, user["id"], body, filename, original, now_iso()),
+        )
+        db.execute("UPDATE doubts SET status = 'answered' WHERE id = ?", (doubt_id,))
+        db.commit()
+        flash("Answer posted. It now appears on the student's portal.", "ok")
+        return redirect(url_for("teacher_doubt", doubt_id=doubt_id))
+    
     answers = db.execute(
         "SELECT * FROM answers WHERE doubt_id = ? ORDER BY id", (doubt_id,)
     ).fetchall()
